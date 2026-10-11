@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from html import unescape
 import re
 from typing import Any
+from urllib.parse import urljoin
 
 from homeassistant.components.sensor import SensorEntity, SensorEntityDescription
 from homeassistant.config_entries import ConfigEntry
@@ -342,6 +343,7 @@ def _personal_offer_product_discount_list_for_offer(
                     "active": offer.get("active"),
                     "product": _clean_label(product.get("name")),
                     "product_code": _clean_label(product.get("code")),
+                    **_product_links(product),
                     "points": points,
                     "points_value": points_value,
                     "required_quantity": required_quantity,
@@ -357,6 +359,30 @@ def _personal_offer_product_discount_list_for_offer(
             )
         )
     return products
+
+
+def _product_links(product: dict[str, Any]) -> dict[str, str]:
+    """Return absolute website and thumbnail URLs when supplied by Delhaize."""
+    links: dict[str, str] = {}
+    product_url = _clean_label(product.get("url"))
+    if product_url:
+        links["product_url"] = urljoin(BASE_URL, product_url)
+    images = product.get("images")
+    if isinstance(images, list):
+        candidates = [
+            image
+            for image in images
+            if isinstance(image, dict) and _clean_label(image.get("url"))
+        ]
+        image = next(
+            (image for image in candidates if image.get("format") == "respThumbnail"),
+            candidates[0] if candidates else None,
+        )
+        if image:
+            links["product_image_url"] = urljoin(
+                "https://static.delhaize.be", _clean_label(image.get("url"))
+            )
+    return links
 
 
 def _personal_offer_required_quantity(offer: dict[str, Any]) -> int:
@@ -518,6 +544,7 @@ def _burnable_offer_discount_product_list(
                         ),
                         "days_remaining": _int_or_none(offer.get("daysRemaining")),
                         "product": _clean_label(product.get("name")),
+                        **_product_links(product),
                         "original_price": _clean_label(price.get("wasPrice"))
                         or _clean_label(price.get("formattedValue")),
                     }

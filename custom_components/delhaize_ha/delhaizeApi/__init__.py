@@ -249,6 +249,10 @@ query PersonalOffersV2($lang: String!) {
         manufacturerSubBrandName
         available
         url
+        images {
+          format
+          url
+        }
         price {
           currencyIso
           currencySymbol
@@ -284,6 +288,10 @@ query ProductList(
       manufacturerSubBrandName
       available
       url
+      images {
+        format
+        url
+      }
       price {
         currencyIso
         currencySymbol
@@ -377,6 +385,10 @@ fragment BurnableProductDetails on Product {
   manufacturerSubBrandName
   available
   url
+  images {
+    format
+    url
+  }
   price {
     currencyIso
     currencySymbol
@@ -433,6 +445,10 @@ fragment BurnableProductDetails on Product {
   manufacturerSubBrandName
   available
   url
+  images {
+    format
+    url
+  }
   price {
     currencyIso
     currencySymbol

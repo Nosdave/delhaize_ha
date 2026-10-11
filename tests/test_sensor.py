@@ -93,6 +93,44 @@ def _load_sensor() -> types.ModuleType:
 sensor = _load_sensor()
 
 
+def test_product_images_and_links_are_exposed_in_both_product_lists() -> None:
+    """Dashboard rows receive absolute product and preferred thumbnail URLs."""
+    product = {
+        "name": "Product",
+        "url": "/fr/shop/p/123",
+        "images": [
+            {"format": "zoom", "url": "/medias/large.jpg"},
+            {"format": "respThumbnail", "url": "/medias/thumbnail.jpg"},
+        ],
+    }
+    offer = {"id": "offer-1", "products": [product]}
+    personal = sensor._personal_offer_product_discount_list_for_offer(offer)[0]
+    burnable = sensor._burnable_offer_discount_product_list(
+        {"burnable_offers": {"burnableOfferList": [offer]}}
+    )[0]
+    for row in (personal, burnable):
+        assert row["product_url"] == "https://www.delhaize.be/fr/shop/p/123"
+        assert row["product_image_url"] == (
+            "https://static.delhaize.be/medias/thumbnail.jpg"
+        )
+
+
+def test_product_links_handle_missing_images_and_absolute_urls() -> None:
+    """Missing or malformed image entries are skipped without breaking rows."""
+    assert sensor._product_links({}) == {}
+    assert sensor._product_links({"images": "invalid"}) == {}
+    assert sensor._product_links({"images": [None, {}, {"url": ""}]}) == {}
+    assert sensor._product_links(
+        {
+            "url": "https://www.delhaize.be/nl/shop/p/123",
+            "images": [None, {}, {"url": "https://static.delhaize.be/image.jpg"}],
+        }
+    ) == {
+        "product_url": "https://www.delhaize.be/nl/shop/p/123",
+        "product_image_url": "https://static.delhaize.be/image.jpg",
+    }
+
+
 def test_personal_offer_products_use_points_value_over_original_price() -> None:
     """Personal point percentage should use wasPrice and one cent per point."""
     data = {

@@ -73,7 +73,7 @@ The integration creates sensors for:
 
 ## Dashboard example
 
-The offer sensors expose detailed attributes that can be used in a Markdown card. This example searches for Delhaize offer sensors automatically, so it can work with one or more configured accounts without hardcoding entity IDs.
+The offer sensors expose detailed attributes that can be used in a Markdown card. This example searches for Delhaize offer sensors automatically, so it can work with one or more configured accounts without hardcoding entity IDs. Product tables include 80-pixel thumbnails that link to the product page on Delhaize.be. A dash is shown when the product image or page URL is unavailable.
 
 ```yaml
 type: markdown
@@ -120,9 +120,9 @@ content: |
   {% if personal_products %}
   **Personal promotion value**
 
-  | Product | Offer | Points value | Qty | Unit price | Qualifying total | Discount | Status |
-  |---|---|---:|---:|---:|---:|---:|---:|
-  {% for product in personal_products %}| {{ product.get('product', '-') | replace('|',' ') }} | {{ product.get('offer', '-') | replace('|',' ') }}{% if product.get('promotion') and product.get('promotion') != product.get('offer') %} ({{ product.get('promotion') | replace('_',' ') | replace('|',' ') }}){% endif %} | €{{ product.get('points_value', '-') }} / {{ product.get('points', '-') }} pts | {{ product.get('required_quantity', 1) }} | {{ product.get('original_price', '-') }} | {{ '€' ~ product.get('qualifying_price_value') if product.get('qualifying_price_value') is not none else '-' }} | {{ product.get('discount_percentage_formatted', '-') }} | {{ 'Active' if product.get('active') else 'Available' }} |
+  | Image | Product | Offer | Points value | Qty | Unit price | Qualifying total | Discount | Status |
+  |---|---|---|---:|---:|---:|---:|---:|---:|
+  {% for product in personal_products %}| {% if product.get('product_image_url') and product.get('product_url') %}<a href="{{ product.get('product_url') | e }}"><img src="{{ product.get('product_image_url') | e }}" alt="{{ product.get('product', 'Product') | replace('|',' ') | e }}" width="80"></a>{% else %}-{% endif %} | {{ product.get('product', '-') | replace('|',' ') }} | {{ product.get('offer', '-') | replace('|',' ') }}{% if product.get('promotion') and product.get('promotion') != product.get('offer') %} ({{ product.get('promotion') | replace('_',' ') | replace('|',' ') }}){% endif %} | €{{ product.get('points_value', '-') }} / {{ product.get('points', '-') }} pts | {{ product.get('required_quantity', 1) }} | {{ product.get('original_price', '-') }} | {{ '€' ~ product.get('qualifying_price_value') if product.get('qualifying_price_value') is not none else '-' }} | {{ product.get('discount_percentage_formatted', '-') }} | {{ 'Active' if product.get('active') else 'Available' }} |
   {% endfor %}
   {% endif %}
 
@@ -152,9 +152,9 @@ content: |
   Products: {{ states(burnable_entity) }}
 
   {% if burnable %}
-  | Product | Offer | Point price | Original | Discount | Remaining |
-  |---|---|---:|---:|---:|---:|
-  {% for product in burnable %}| {{ product.get('product', '-') | replace('|',' ') }} | {{ product.get('offer', '-') | replace('|',' ') }} | €{{ product.get('point_price_value', '-') }} / {{ product.get('discount_points', '-') }} pts | {{ product.get('original_price', '-') }} | {{ product.get('discount_percentage_formatted', '-') }} | {{ product.get('days_remaining', '-') }} days |
+  | Image | Product | Offer | Point price | Original | Discount | Remaining |
+  |---|---|---|---:|---:|---:|---:|
+  {% for product in burnable %}| {% if product.get('product_image_url') and product.get('product_url') %}<a href="{{ product.get('product_url') | e }}"><img src="{{ product.get('product_image_url') | e }}" alt="{{ product.get('product', 'Product') | replace('|',' ') | e }}" width="80"></a>{% else %}-{% endif %} | {{ product.get('product', '-') | replace('|',' ') }} | {{ product.get('offer', '-') | replace('|',' ') }} | €{{ product.get('point_price_value', '-') }} / {{ product.get('discount_points', '-') }} pts | {{ product.get('original_price', '-') }} | {{ product.get('discount_percentage_formatted', '-') }} | {{ product.get('days_remaining', '-') }} days |
   {% endfor %}
   {% else %}
   No burnable product discounts found.
@@ -248,12 +248,12 @@ content: >
   **Personal promotion value**
 
 
-  | Product | Offer | Points value | Qty | Unit price | Qualifying total |
+  | Image | Product | Offer | Points value | Qty | Unit price | Qualifying total |
   Discount | 
 
-  |---|---|---:|---:|---:|---:|---:|
+  |---|---|---|---:|---:|---:|---:|---:|
 
-  {% for product in personal_products %}| {{ product.get('product', '-') |
+  {% for product in personal_products %}| {% if product.get('product_image_url') and product.get('product_url') %}<a href="{{ product.get('product_url') | e }}"><img src="{{ product.get('product_image_url') | e }}" alt="{{ product.get('product', 'Product') | replace('|',' ') | e }}" width="80"></a>{% else %}-{% endif %} | {{ product.get('product', '-') |
   replace('|',' ') }} | {{ product.get('offer', '-') | replace('|',' ') }}{% if
   product.get('promotion') and product.get('promotion') != product.get('offer')
   %} ({{ product.get('promotion') | replace('_',' ') | replace('|',' ') }}){%
@@ -277,11 +277,11 @@ content: >
 
   {% if burnable %}
 
-  | Product | Offer | Point price | Original | Discount | Remaining |
+  | Image | Product | Offer | Point price | Original | Discount | Remaining |
 
-  |---|---|---:|---:|---:|---:|
+  |---|---|---|---:|---:|---:|---:|
 
-  {% for product in burnable %}| {{ product.get('product', '-') | replace('|','
+  {% for product in burnable %}| {% if product.get('product_image_url') and product.get('product_url') %}<a href="{{ product.get('product_url') | e }}"><img src="{{ product.get('product_image_url') | e }}" alt="{{ product.get('product', 'Product') | replace('|',' ') | e }}" width="80"></a>{% else %}-{% endif %} | {{ product.get('product', '-') | replace('|','
   ') }} | {{ product.get('offer', '-') | replace('|',' ') }} | €{{
   product.get('point_price_value', '-') }}| {{ product.get('original_price',
   '-') }} | {{ product.get('discount_percentage_formatted', '-') }} | {{
