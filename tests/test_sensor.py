@@ -299,8 +299,8 @@ def test_quantity_parser_normalizes_api_underscore_separator() -> None:
 
 
 
-def test_burnable_offer_uses_points_as_discount_value() -> None:
-    """Redeemed points are the saving, rather than the remaining product price."""
+def test_burnable_offer_uses_points_as_purchase_price() -> None:
+    """Savings subtract the redeemed points value from the normal price."""
     data = {
         "burnable_offers": {
             "burnableOfferList": [
@@ -329,10 +329,33 @@ def test_burnable_offer_uses_points_as_discount_value() -> None:
             "discount_points": 125,
             "point_price_value": 1.25,
             "original_price_value": 1.79,
-            "discount_percentage": 69.8,
-            "discount_percentage_formatted": "69.8%",
+            "discount_percentage": 30.2,
+            "discount_percentage_formatted": "30.2%",
             "days_remaining": 14,
             "product": "Chips Chipito Fromage",
             "original_price": "€ 1,79",
         }
     ]
+
+
+def test_burnable_range_savings_use_original_price_and_handle_missing_costs() -> None:
+    """Range offers use wasPrice and omit savings when prices are unavailable."""
+    for points, price, expected in (
+        (125, {"wasPrice": "4.00", "value": 3}, 68.8),
+        (0, {"value": 4}, 100.0),
+        (400, {"value": 4}, 0.0),
+        (None, {"value": 4}, None),
+        (125, {}, None),
+        (125, {"value": 0}, None),
+    ):
+        data = {
+            "burnable_offer_ranges": [
+                {
+                    "id": "range-1",
+                    "priceToBurn": points,
+                    "products": [{"price": price}],
+                }
+            ]
+        }
+        row = sensor._burnable_offer_discount_product_list(data)[0]
+        assert row.get("discount_percentage") == expected

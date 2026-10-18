@@ -507,7 +507,7 @@ def _burnable_offer_discount_attributes(data: dict[str, Any]) -> dict[str, Any]:
 def _burnable_offer_discount_product_list(
     data: dict[str, Any],
 ) -> list[dict[str, Any]] | None:
-    """Return burnable offer product rows with point and euro discount values."""
+    """Return burnable offer products with points costs and saving percentages."""
     offers = _burnable_offer_sources(data)
     if offers is None:
         return None
@@ -528,7 +528,7 @@ def _burnable_offer_discount_product_list(
             original_price_value = _price_amount(price.get("wasPrice"))
             if original_price_value is None:
                 original_price_value = _price_amount(price.get("value"))
-            discount_percentage = _value_percentage(
+            discount_percentage = _percentage(
                 point_price_value, original_price_value
             )
             products.append(
